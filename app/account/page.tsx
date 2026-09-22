@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Package, ShoppingCart, Truck, CreditCard, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,11 @@ export const metadata: Metadata = {
 export default async function AccountPage() {
   const session = await auth();
 
-  if (!session?.user?.id) {
+  if (!session?.user) {
     redirect(`/api/auth/signin?callbackUrl=/account`);
   }
+
+  const user = session.user;
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,7 +26,7 @@ export default async function AccountPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">My Account</h1>
           <p className="mt-2 text-muted-foreground">
-            Welcome back, {session.user.name ?? "Customer"}. Manage your account and orders.
+            Welcome back, {user.name ?? "Customer"}. Manage your account and orders.
           </p>
         </div>
 
