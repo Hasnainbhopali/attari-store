@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import type { Role } from "@prisma/client";
 import type { Cart, CartItem, Product } from "@prisma/client";
 
+const OWNER_EMAIL = "hasnainhm128@gmail.com";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
@@ -37,6 +39,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async signIn({ user }) {
+      // Enforce single-owner authorization server-side on every sign-in
+      if (user.email && user.id) {
+        const desiredRole: Role =
+          user.email.toLowerCase() === OWNER_EMAIL ? "OWNER" : "CUSTOMER";
+        const currentRole = user.role ?? "CUSTOMER";
+
+        if (currentRole !== desiredRole) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: desiredRole },
+          });
+          user.role = desiredRole;
+        }
+      }
+
       // After successful sign in, merge guest cart if exists
       if (user?.id) {
         try {
