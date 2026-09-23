@@ -22,8 +22,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // This runs only when a new session is created (at sign-in), after
+        // the PrismaAdapter has guaranteed the user record exists in the DB,
+        // so `user.id` and `user.role` are the real persisted values.
         token.id = user.id;
-        token.role = (user.role as Role) ?? "CUSTOMER";
+
+        const desiredRole: Role = user.email
+          ? user.email.toLowerCase() === OWNER_EMAIL
+            ? "OWNER"
+            : "CUSTOMER"
+          : (user.role as Role) ?? "CUSTOMER";
+
+        if (user.email) {
+          try {
+            const currentRole = user.role ?? "CUSTOMER";
+            if (currentRole !== desiredRole) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { role: desiredRole },
+              });
+            }
+            token.role = desiredRole;
+          } catch (error) {
+            // Never let a role sync failure break Google sign-in.
+            console.error("Role sync on sign in failed:", error);
+            token.role = (user.role as Role) ?? "CUSTOMER";
+          }
+        } else {
+          token.role = desiredRole;
+        }
       }
       return token;
     },
@@ -39,21 +66,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async signIn({ user }) {
-      // Enforce single-owner authorization server-side on every sign-in
-      if (user.email && user.id) {
-        const desiredRole: Role =
-          user.email.toLowerCase() === OWNER_EMAIL ? "OWNER" : "CUSTOMER";
-        const currentRole = user.role ?? "CUSTOMER";
-
-        if (currentRole !== desiredRole) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { role: desiredRole },
-          });
-          user.role = desiredRole;
-        }
-      }
-
       // After successful sign in, merge guest cart if exists
       if (user?.id) {
         try {
