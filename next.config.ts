@@ -12,7 +12,7 @@ const securityHeaders = [
       "connect-src 'self' https://accounts.google.com https://www.googleapis.com https://api.cloudinary.com",
       "frame-src https://accounts.google.com",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://accounts.google.com https://www.google.com",
     ].join("; "),
   },
   {
