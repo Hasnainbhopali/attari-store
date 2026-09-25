@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { q, limit = 10 } = validation.data;
+  const { q, limit = 8 } = validation.data;
 
   if (!q || q.length < 2) {
-    return NextResponse.json({ suggestions: [], products: [] });
+    return NextResponse.json({ suggestions: [] });
   }
 
   if (q.length > 50) {
@@ -36,47 +36,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Use raw SQL with trigram similarity for fuzzy matching and ranking
-    const results = await prisma.$queryRawUnsafe<Array<{
+    // Fetch product suggestions with trigram similarity
+    const productResults = await prisma.$queryRawUnsafe<Array<{
       id: string;
       name: string;
       slug: string;
-      sku: string;
-      price: number;
-      compareAtPrice: number | null;
-      stockQuantity: number;
       imageUrl: string | null;
       categoryName: string | null;
-      categorySlug: string | null;
       similarity: number;
-      matchType: string;
     }>>(
       `
       SELECT
         p.id,
         p.name,
         p.slug,
-        p.sku,
-        p.price,
-        p."compareAtPrice",
-        p."stockQuantity",
         pi.url as "imageUrl",
         c.name as "categoryName",
-        c.slug as "categorySlug",
         GREATEST(
           similarity(p.name, $1),
-          similarity(p.sku, $1),
-          similarity(p.description, $1) * 0.5,
-          similarity(c.name, $1) * 0.7
-        ) as similarity,
-        CASE
-          WHEN p.name ILIKE $1 THEN 'exact_name'
-          WHEN p.sku ILIKE $1 THEN 'exact_sku'
-          WHEN similarity(p.name, $1) > 0.5 THEN 'fuzzy_name'
-          WHEN similarity(p.sku, $1) > 0.5 THEN 'fuzzy_sku'
-          WHEN similarity(c.name, $1) > 0.4 THEN 'category'
-          ELSE 'description'
-        END as "matchType"
+          similarity(p.sku, $1)
+        ) as similarity
       FROM "Product" p
       LEFT JOIN "ProductImage" pi ON pi."productId" = p.id AND pi."sortOrder" = 0
       LEFT JOIN "Category" c ON c.id = p."categoryId"
@@ -84,34 +63,22 @@ export async function GET(request: NextRequest) {
         AND (
           similarity(p.name, $1) > 0.3
           OR similarity(p.sku, $1) > 0.3
-          OR similarity(p.description, $1) > 0.3
-          OR similarity(c.name, $1) > 0.4
         )
-      ORDER BY
-        CASE
-          WHEN p.name ILIKE $1 THEN 1
-          WHEN p.sku ILIKE $1 THEN 2
-          ELSE 3
-        END,
-        similarity DESC,
-        p."isFeatured" DESC,
-        p."stockQuantity" DESC
+      ORDER BY similarity DESC, p."isFeatured" DESC, p."stockQuantity" DESC
       LIMIT $2
       `,
       q,
-      limit
+      Math.min(limit, 6)
     );
 
-    // Also search categories
+    // Category suggestions
     const categories = await prisma.category.findMany({
       where: {
         isActive: true,
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-        ],
+        name: { contains: q, mode: "insensitive" },
       },
       orderBy: { name: "asc" },
-      take: 5,
+      take: 3,
       select: {
         id: true,
         name: true,
@@ -120,36 +87,38 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const products = results.map((p) => ({
+    const productSuggestions = productResults.map((p) => ({
+      type: "product" as const,
       id: p.id,
       name: p.name,
       slug: p.slug,
-      sku: p.sku,
-      price: Number(p.price),
-      compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-      stockQuantity: p.stockQuantity,
       image: p.imageUrl,
-      category: p.categoryName ? { name: p.categoryName, slug: p.categorySlug } : null,
-      similarity: p.similarity,
-      matchType: p.matchType,
+      category: p.categoryName,
     }));
 
+    const categorySuggestions = categories.map((c) => ({
+      type: "category" as const,
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      productCount: c._count.products,
+    }));
+
+    // Combine and limit total suggestions
+    const allSuggestions = [
+      ...productSuggestions,
+      ...categorySuggestions,
+    ].slice(0, limit);
+
     return NextResponse.json({
-      suggestions: categories.map((c) => ({
-        type: "category",
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-        productCount: c._count.products,
-      })),
-      products,
+      suggestions: allSuggestions,
     }, {
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
       }
     });
   } catch (error) {
-    console.error("Search API error:", error);
+    console.error("Autocomplete API error:", error);
     return NextResponse.json(
       { error: "Search failed" },
       { status: 500 }
