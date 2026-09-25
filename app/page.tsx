@@ -66,62 +66,6 @@ const featuredProducts = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Zap className="size-5" />
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-bold leading-none tracking-tight">
-                  ATTARI
-                </p>
-                <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Electric & Hardware
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          {/* Search */}
-          <div className="relative ml-auto flex max-w-xl flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search electrical & hardware products..."
-              className="h-10 w-full rounded-lg border bg-muted/40 pl-10 pr-4 text-sm outline-none transition focus:border-primary focus:bg-background focus:ring-2 focus:ring-primary/10"
-            />
-          </div>
-
-          <nav className="hidden items-center gap-2 md:flex">
-            <Link
-              href="/categories"
-              className="rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-muted"
-            >
-              Categories
-            </Link>
-
-            <Link
-              href="/cart"
-              className="relative rounded-lg p-2.5 transition hover:bg-muted"
-              aria-label="Shopping cart"
-            >
-              <ShoppingCart className="size-5" />
-            </Link>
-
-            <Link
-              href="/account"
-              className="rounded-lg p-2.5 transition hover:bg-muted"
-              aria-label="Account"
-            >
-              <CircleUserRound className="size-5" />
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       {/* Hero */}
       <section className="border-b bg-muted/30">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
