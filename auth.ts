@@ -26,6 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // the PrismaAdapter has guaranteed the user record exists in the DB,
         // so `user.id` and `user.role` are the real persisted values.
         token.id = user.id;
+        token.image = user.image;
 
         const desiredRole: Role = user.email
           ? user.email.toLowerCase() === OWNER_EMAIL
@@ -58,6 +59,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         if (token.id) {
           session.user.id = token.id as string;
+        }
+        if (token.image) {
+          session.user.image = token.image as string;
         }
         if (token.role) {
           session.user.role = (token.role as Role) ?? "CUSTOMER";
