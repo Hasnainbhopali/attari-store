@@ -2,9 +2,10 @@ import { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Package, ShoppingCart, Truck, CreditCard, User, Settings } from "lucide-react";
+import { ChevronRight, Package, ShoppingCart, Truck, CreditCard, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogoutButton } from "./LogoutButton";
 
 export const metadata: Metadata = {
   title: "My Account | ATTARI Electric & Hardware Store",
@@ -138,6 +139,12 @@ export default async function AccountPage() {
                 <span className="text-sm font-medium">Settings</span>
                 <ChevronRight className="size-4 text-muted-foreground" />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/50">
+            <CardContent className="pt-6">
+              <LogoutButton />
             </CardContent>
           </Card>
         </div>

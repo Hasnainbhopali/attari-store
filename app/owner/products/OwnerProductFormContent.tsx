@@ -184,20 +184,17 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
 
   const topLevelCategories = categories.filter((c) => !c.parentId);
 
-  return (
+return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             {isEditing ? "Edit Product" : "Create Product"}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="mt-2 text-muted-foreground">
             {isEditing ? "Update product details" : "Add a new product to your catalog"}
           </p>
         </div>
-        <Button type="submit" disabled={isSubmitting} className="ml-auto">
-          {isSubmitting ? "Saving..." : "Save Product"}
-        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -401,11 +398,11 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
 
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {existingImages.map((img, i) => (
-                    <button
+                    <div
                       key={img.id}
                       onClick={() => setSelectedImageIndex(i)}
                       className={cn(
-                        "relative h-16 w-16 shrink-0 rounded-lg border-2 overflow-hidden",
+                        "relative h-16 w-16 shrink-0 rounded-lg border-2 overflow-hidden cursor-pointer",
                         selectedImageIndex === i ? "border-primary" : "border-transparent hover:border-muted"
                       )}
                     >
@@ -413,17 +410,18 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
                       <button
                         onClick={(e) => { e.stopPropagation(); removeExistingImage(img.id); }}
                         className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground"
+                        aria-label="Remove image"
                       >
                         <X className="size-3" />
                       </button>
-                    </button>
+                    </div>
                   ))}
                   {imagePreviews.map((preview, i) => (
-                    <button
+                    <div
                       key={`preview-${i}`}
                       onClick={() => setSelectedImageIndex(existingImages.length + i)}
                       className={cn(
-                        "relative h-16 w-16 shrink-0 rounded-lg border-2 overflow-hidden",
+                        "relative h-16 w-16 shrink-0 rounded-lg border-2 overflow-hidden cursor-pointer",
                         selectedImageIndex === existingImages.length + i ? "border-primary" : "border-transparent"
                       )}
                     >
@@ -431,10 +429,11 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
                       <button
                         onClick={(e) => { e.stopPropagation(); removeNewImage(i); }}
                         className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground"
+                        aria-label="Remove image"
                       >
                         <X className="size-3" />
                       </button>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -481,7 +480,7 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : isEditing ? "Update Product" : "Create Product"}
+          {isSubmitting ? "Saving..." : "Save Product"}
         </Button>
       </div>
     </form>
