@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Search, ShoppingCart, CircleUserRound, Menu, X, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { CartButton } from "@/components/cart";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -18,6 +19,7 @@ interface SearchSuggestion {
 }
 
 export function Header() {
+  const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -271,7 +273,15 @@ export function Header() {
             className="rounded-lg p-2.5 transition hover:bg-muted"
             aria-label="Account"
           >
-            <CircleUserRound className="size-5" />
+            {session?.user?.image ? (
+              <img
+                src={session.user.image}
+                alt={`${session.user.name ?? "User"} profile`}
+                className="size-5 rounded-full"
+              />
+            ) : (
+              <CircleUserRound className="size-5" />
+            )}
           </Link>
         </nav>
       </div>
