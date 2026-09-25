@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, ShoppingCart, CircleUserRound, Menu, X, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { CartButton } from "@/components/cart";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -20,6 +21,7 @@ interface SearchSuggestion {
 
 export function Header() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -98,7 +100,7 @@ export function Header() {
           handleSuggestionClick(suggestions[selectedIndex]);
         } else {
           // Navigate to full search results
-          window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+          router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
         }
         break;
       case "Escape":
@@ -111,9 +113,9 @@ export function Header() {
 
   const handleSuggestionClick = (suggestion: SearchSuggestion) => {
     if (suggestion.type === "product") {
-      window.location.href = `/products/${suggestion.slug}`;
+      router.push(`/products/${suggestion.slug}`);
     } else {
-      window.location.href = `/categories/${suggestion.slug}`;
+      router.push(`/categories/${suggestion.slug}`);
     }
     setIsDropdownOpen(false);
     setSearchQuery("");
@@ -253,7 +255,7 @@ export function Header() {
               id="search-suggestions"
               className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border bg-background shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 p-4 text-center text-muted-foreground"
             >
-              No products or categories found for "{searchQuery}"
+              No products or categories found for &ldquo;{searchQuery}&rdquo;
             </div>
           )}
         </div>

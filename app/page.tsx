@@ -137,7 +137,7 @@ export default async function Home() {
             <div className="max-w-2xl">
               <div className="mb-6 flex w-fit items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs font-medium">
                 <Sparkles className="size-3.5" />
-                Pakistan's Leading Electrical & Hardware Store
+                Pakistan&apos;s Leading Electrical & Hardware Store
               </div>
 
               <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
