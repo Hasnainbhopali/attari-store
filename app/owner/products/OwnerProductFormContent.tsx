@@ -338,11 +338,12 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
           <section className="rounded-xl border bg-card p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Images</h2>
-              <Label className="cursor-pointer" htmlFor="image-upload">
-                <Button variant="outline" size="sm" type="button">
-                  <Upload className="size-4 mr-2" />
-                  Add Images
-                </Button>
+              <label
+                htmlFor="image-upload"
+                className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                <Upload className="size-4" />
+                Add Images
                 <input
                   id="image-upload"
                   type="file"
@@ -351,7 +352,7 @@ export function OwnerProductFormContent({ product, categories, isEditing }: Owne
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-              </Label>
+              </label>
             </div>
 
             {(existingImages.length + imagePreviews.length) > 0 && (
